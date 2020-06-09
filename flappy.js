@@ -1,6 +1,6 @@
 function novoElemento(tagName, className) {
 	const elem = document.createElement(tagName)
-        elem.className = className
+    elem.className = className
 	return elem
  }
 
@@ -15,8 +15,8 @@ function Barreira(reversa = false) {
 	this.setAltura = altura => corpo.style.height = `${altura}px`
 } 
 
-function ParDeBarreiras(altura, largura, x) {
-    this.elemento = novoElemento('div', 'par-de-barreira')
+function ParDeBarreiras(altura, abertura, x) {
+    this.elemento = novoElemento('div', 'par-de-barreiras')
 
     this.superior = new  Barreira(true)
     this.inferior = new  Barreira(false)
@@ -33,10 +33,10 @@ function ParDeBarreiras(altura, largura, x) {
 
     this.getX = () => parseInt(this.elemento.style.left.split('px')[0])
     this.setX = x => this.elemento.style.left = `${x}px`
-    this.getAltura = () => this.elemento.clientWidth
+    this.getLargura = () => this.elemento.clientWidth
 
     this.sortearAbertura()
-    this.setX()
+    this.setX(x)
 }
 
 function Barreiras(altura, largura, abertura, espaco, notificarPonto) {
@@ -53,7 +53,7 @@ function Barreiras(altura, largura, abertura, espaco, notificarPonto) {
             par.setX(par.getX() - deslocamento)
 
             //Quando o elemento sair da pagina
-            if(par.getX() < -par.getAltura()) {
+            if(par.getX() < -par.getLargura()) {
                 par.setX(par.getX() + espaco * this.pares.length)
                 par.sortearAbertura() 
             }
@@ -70,7 +70,7 @@ function Passaro(alturaJogo) {
     let voando = false
 
     this.elemento = novoElemento('img', 'passaro')
-    this.elemento.src = 'imgs/passaro.img'
+    this.elemento.src = '/Flappy/img/passaro.png'
 
     this.getY = () => parseInt(this.elemento.style.bottom.split('px')[0])
     this.setY = y => this.elemento.style.bottom = `${y}px`
@@ -106,7 +106,7 @@ function estaoSobrepostos(elementoA, elementoB) {
     const a = elementoA.getBoundingClientRect()
     const b = elementoB.getBoundingClientRect()
 
-    const horizontal = a.left + width >= b.left
+    const horizontal = a.left + a.width >= b.left
         && b.left + b.width >= a.left
     const vertical = a.top + a.height >= b.top
         && b.top + b.height >= a.top
@@ -114,13 +114,15 @@ function estaoSobrepostos(elementoA, elementoB) {
 }
 
 //Colizão do passaro
-function colidiu(passaro, barreira) {
+function colidiu(passaro, barreiras) {
     let colidiu = false
-    barreiras.pares.forEach(ParDeBarreiras =>{
-        const superior = ParDeBarreiras.superior.elemento
-        const inferior = ParDeBarreiras.inferior.elemento
+    barreiras.pares.forEach(parDeBarreiras =>{
+        if(!colidiu) {
+        const superior = parDeBarreiras.superior.elemento
+        const inferior = parDeBarreiras.inferior.elemento
         colidiu = estaoSobrepostos(passaro.elemento, superior)
-            || estaoSobrepostos(passaro.elemento, inderior)
+            || estaoSobrepostos(passaro.elemento, inferior)
+        }
     })
 
     return colidiu
@@ -148,7 +150,7 @@ function FlappyBird() {
             barreiras.animar()
             passaro.animar()
 
-            if(colidiu(passaro, barreira)) {
+            if(colidiu(passaro, barreiras)) {
                 clearInterval(temporizador)
             }
         }, 20)
